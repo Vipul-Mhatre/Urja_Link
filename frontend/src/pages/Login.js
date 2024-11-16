@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+import config from '../config/config';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -10,10 +11,11 @@ function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${config.apiUrl}/api/auth/login`, {
         email,
         password
       });
@@ -66,5 +68,3 @@ function Login() {
     </div>
   );
 }
-
-export default Login;
