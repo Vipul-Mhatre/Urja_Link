@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import Img1 from '../../assets/img1.jpg';
-import tutorialsdev from '../../assets/tutorialsdev.png';
+import journalist from '../../assets/journalist.png';
+import vipul from '../../assets/vipul.jpeg'
+import employee from '../../assets/employee.png';
+
 import Input from '../../components/Input';
 import { io } from 'socket.io-client';
 
@@ -110,7 +112,7 @@ const Dashboard = () => {
         <div className="flex items-center my-8 mx-14">
           <div>
             <img
-              src={tutorialsdev}
+              src={vipul}
               width={75}
               height={75}
               className="border border-primary p-[2px] rounded-full"
@@ -134,7 +136,7 @@ const Dashboard = () => {
                   >
                     <div>
                       <img
-                        src={Img1}
+                        src={journalist}
                         className="w-[60px] h-[60px] rounded-full p-[2px] border border-primary"
                       />
                     </div>
@@ -156,7 +158,7 @@ const Dashboard = () => {
         {messages?.receiver?.fullName && (
           <div className="w-[75%] bg-secondary h-[80px] my-14 rounded-full flex items-center px-14 py-2">
             <div className="cursor-pointer">
-              <img src={Img1} width={60} height={60} className="rounded-full" />
+              <img src={journalist} width={60} height={60} className="rounded-full" />
             </div>
             <div className="ml-6 mr-auto">
               <h3 className="text-lg">{messages?.receiver?.fullName}</h3>
@@ -237,7 +239,7 @@ const Dashboard = () => {
                 >
                   <div>
                     <img
-                      src={Img1}
+                      src={employee}
                       className="w-[60px] h-[60px] rounded-full p-[2px] border border-primary"
                     />
                   </div>
