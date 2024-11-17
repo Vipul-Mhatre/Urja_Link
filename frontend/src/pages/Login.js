@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+
 import config from '../config/config';
 
 function Login() {
@@ -68,3 +69,5 @@ function Login() {
     </div>
   );
 }
+
+export default Login;
