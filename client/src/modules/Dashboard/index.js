@@ -21,17 +21,27 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (socket && user) {
-      socket.emit('addUser', user?.id);
-      socket.on('getMessage', (data) => {
+      const handleMessage = (data) => {
         setMessages((prevMessages) => {
+          if (prevMessages.messages.some((msg) => msg.id === data.id)) {
+            return prevMessages; // Avoid duplicate
+          }
           return {
             ...prevMessages,
-            messages: [...prevMessages.messages, data]
+            messages: [...prevMessages.messages, data],
           };
         });
-      });
+      };
+  
+      socket.emit('addUser', user?.id);
+      socket.on('getMessage', handleMessage);
+  
+      return () => {
+        socket.off('getMessage', handleMessage); // Cleanup listener
+      };
     }
   }, [socket, user]);
+  
 
   useEffect(() => {
     messageRef?.current?.scrollIntoView({ behavior: 'smooth' });
@@ -82,29 +92,59 @@ const Dashboard = () => {
 
   const sendMessage = async () => {
     if (!message) return;
-
-    socket.emit('sendMessage', {
+  
+    const newMessage = {
       senderId: user?.id,
       receiverId: messages?.receiver?.receiverId,
       message,
-      conversationId: messages?.conversationId
-    });
-
-    const res = await fetch(`http://localhost:8000/api/message`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        conversationId: messages?.conversationId,
-        senderId: user?.id,
-        message,
-        receiverId: messages?.receiver?.receiverId
-      }),
-    });
-
-    setMessage(''); 
+      conversationId: messages?.conversationId,
+      bgClass: 'bg-primary text-white rounded-tl-xl ml-auto', // Styling for sent messages
+    };
+  
+    // Emit the message through WebSocket
+    socket.emit('sendMessage', newMessage);
+  
+    // Optimistically update the local state
+    setMessages((prevState) => ({
+      ...prevState,
+      messages: [...prevState.messages, { ...newMessage, id: Date.now() }], // Temporary ID for UI rendering
+    }));
+  
+    setMessage(''); // Clear the input field
+  
+    try {
+      // Save the message to the server
+      await fetch(`http://localhost:8000/api/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newMessage),
+      });
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
   };
+  
+  
+  useEffect(() => {
+    if (socket && user) {
+      const handleMessage = (data) => {
+        setMessages((prevMessages) => ({
+          ...prevMessages,
+          messages: [...prevMessages.messages, data],
+        }));
+      };
+  
+      socket.emit('addUser', user?.id);
+      socket.on('getMessage', handleMessage);
+  
+      return () => {
+        socket.off('getMessage', handleMessage); // Cleanup listener
+      };
+    }
+  }, [socket, user]);
+  
 
   return (
     <div className="w-screen flex">
@@ -175,7 +215,7 @@ const Dashboard = () => {
                   className={`max-w-[40%] rounded-b-xl p-4 mb-6 ${
                     id === user?.id
                       ? 'bg-primary text-white rounded-tl-xl ml-auto'
-                      : 'bg-secondary rounded-tr-xl'
+                      : 'bg-primary text-white rounded-tl-xl ml-auto'
                   }`}
                   key={index}
                 >

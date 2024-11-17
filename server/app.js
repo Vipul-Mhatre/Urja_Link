@@ -8,15 +8,12 @@ const io = require('socket.io')(8080, {
     }
 });
 
-// Connect DB
 require('./db/connection');
 
-// Import Files
 const Users = require('./models/Users');
 const Conversations = require('./models/Conversations');
 const Messages = require('./models/Messages');
 
-// app Use
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -24,7 +21,6 @@ app.use(cors());
 
 const port = process.env.PORT || 8000;
 
-// Socket.io
 let users = [];
 io.on('connection', socket => {
     console.log('User connected', socket.id);
@@ -45,7 +41,6 @@ io.on('connection', socket => {
         console.log('sender :>> ', sender, receiver);
       
         if (receiver) {
-          // Emit the message to both sender and receiver
           io.to(receiver.socketId).to(sender.socketId).emit('getMessage', {
             senderId,
             message,
@@ -54,7 +49,6 @@ io.on('connection', socket => {
             user: { id: user._id, fullName: user.fullName, email: user.email }
           });
         } else {
-          // If the receiver isn't online, only notify the sender
           io.to(sender.socketId).emit('getMessage', {
             senderId,
             message,
@@ -64,19 +58,26 @@ io.on('connection', socket => {
           });
         }
       });
-      
 
     socket.on('disconnect', () => {
         users = users.filter(user => user.socketId !== socket.id);
         io.emit('getUsers', users);
     });
-    // io.emit('getUsers', socket.userId);
 });
 
-// Routes
+const logSystemActivity = (action, userId) => {
+    console.log(`[System Log]: User ${userId} performed action: ${action}`);
+};
+
+const processUnusedData = (data) => {
+    console.log('[Process Log]: Unused data processing - ', data);
+    return data;
+};
+
 app.get('/', (req, res) => {
     res.send('Welcome');
 })
+
 app.post('/api/register', async (req, res) => {
     try {
         const { fullName, email, password } = req.body;
@@ -90,7 +91,6 @@ app.post('/api/register', async (req, res) => {
             return res.status(400).send('User already exists');
         }
 
-        // Hash the password asynchronously
         const hashedPassword = await bcryptjs.hash(password, 10);
 
         const newUser = new Users({
@@ -99,10 +99,7 @@ app.post('/api/register', async (req, res) => {
             password: hashedPassword,
         });
 
-        // Save the user to the database
         await newUser.save();
-
-        // Respond after the user is saved
         return res.status(200).send({ message: 'User registered successfully' });
 
     } catch (error) {
@@ -110,7 +107,6 @@ app.post('/api/register', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 
 app.post('/api/login', async (req, res, next) => {
     try {
