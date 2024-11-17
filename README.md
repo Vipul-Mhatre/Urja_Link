@@ -2,6 +2,10 @@
 
 Urja_Link is a web application designed to manage energy-related data efficiently and intuitively. This repository contains the codebase for the app, including both the backend and frontend implementations.
 
+## Demo Video
+
+https://drive.google.com/file/d/1sWrvtL78D4VOBCEd3Hk5MnhBXAfU_9US/view?usp=drive_link
+
 ## Table of Contents
 
 - [Features](#features)
